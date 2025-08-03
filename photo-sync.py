@@ -42,7 +42,11 @@ def process_image_files(file_list, destination_directory):
     for file_path in file_list:
         file_path = file_path.strip()  # Remove any leading/trailing whitespace
         if os.path.isfile(file_path) and file_path.lower().endswith(file_extensions):
-            date = get_date(file_path)
+            try:
+                date = get_date(file_path)
+            except Exception as e:
+                print(f"Error reading file {file_path}: {str(e)}")
+                raise
 
             if date:
                 # Create destination path
@@ -58,8 +62,11 @@ def process_image_files(file_list, destination_directory):
                     source_size = os.path.getsize(file_path)
                     dest_size = os.path.getsize(dest_path)
                     if source_size > dest_size:
-                        # Overwrite the destination file
-                        shutil.copy2(file_path, dest_path)
+                        try:
+                            shutil.copy2(file_path, dest_path)
+                        except Exception as e:
+                            print(f"Error copying file {file_path} to {dest_path}: {str(e)}")
+                            raise
                         overwritten_log.write(f"{file_path} -> {dest_path} (overwritten)\n")
                         print(f"Overwritten (larger file): {file_path} -> {dest_path}")
                     else:
@@ -70,7 +77,11 @@ def process_image_files(file_list, destination_directory):
                     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
 
                     # Copy file
-                    shutil.copy2(file_path, dest_path)
+                    try:
+                        shutil.copy2(file_path, dest_path)
+                    except Exception as e:
+                        print(f"Error copying file {file_path} to {dest_path}: {str(e)}")
+                        raise
                     copied_log.write(f"{file_path} -> {dest_path}\n")
                     print(f"Copied: {file_path} -> {dest_path}")
             else:
@@ -78,7 +89,7 @@ def process_image_files(file_list, destination_directory):
                 print(f"Not copied (no date): {file_path}")
         else:
             not_copied_log.write(f"{file_path} (not a valid jpg file)\n")
-            print(f"Not copied (not a valid jpg file): {file_path}")
+            print(f"Not copied (not a valid jpg file): {file_path}")    
 
     copied_log.close()
     not_copied_log.close()
